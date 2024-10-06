@@ -11,14 +11,16 @@ from peft import get_peft_model, LoraConfig, TaskType
 
 import numpy as np
 import torch
-from lightning.pytorch import seed_everything
+#from lightning.pytorch import seed_everything
+from pytorch_lightning import seed_everything
+
 seed = 42
 seed_everything(seed, workers=True)
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "4" 
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "4" 
 
 import evaluate
 
@@ -53,6 +55,7 @@ label2id = {v: k for k, v in id2label.items()}
 ds = load_task(dataset)
 dev_name = 'dev'
 text_name = 'text'
+
 ##############################################################################################################################################################################
 
 accuracy = evaluate.load("accuracy")
@@ -63,7 +66,7 @@ model = LlamaForSequenceClassification.from_pretrained(
 peft_config = LoraConfig(task_type=TaskType.SEQ_CLS, inference_mode=False, r=lora_r, lora_alpha=32, lora_dropout=0.1)
 model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
-
+print('finished loading model')
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
@@ -88,7 +91,7 @@ def preprocess_function(examples):
 
 tokenized_ds = ds.map(preprocess_function, batched=True)
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
+print('Start training ...')
 
 training_args = TrainingArguments(
     output_dir= output_dir,
@@ -114,12 +117,13 @@ trainer = Trainer(
 )
 
 trainer.train()
-
+print('predictions')
 # Predictions on the dev set
 predictions = trainer.predict(tokenized_ds[dev_name])
 
 # Save the predictions to a file
-with open(f"{dataset}_{model_size}_dev_predictions.json", "w") as f:
+convert_dataset_name= '_'.join(dataset.split('/'))
+with open(f"{convert_dataset_name}_{model_size}_dev_predictions.json", "w") as f:
     json.dump(predictions.predictions.tolist(), f)
 
 # # Predictions on the test set

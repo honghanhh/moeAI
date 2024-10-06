@@ -1,0 +1,1 @@
+python inference.py MGT_en_llama_7b/checkpoint-381730 7b Jinyan1/COLING_2025_MGT_en  
