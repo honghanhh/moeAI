@@ -38,8 +38,6 @@ def main():
         print(' - output_dir: Directory where the trained model is saved.')
         print(' - model_size: Size of the model (e.g., 7b, 13b).')
         print(' - input_data: Name of dataset (JSONL format recommended).')
-        print(' - input_format: (Optional) "jsonl" or "csv". Default is "jsonl".')
-        print(' - text_field: (Optional) Name of the text field in the input data. Default is "text".')
         sys.exit(1)
     
     output_dir = sys.argv[1]
